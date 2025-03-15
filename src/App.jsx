@@ -26,6 +26,7 @@ function App() {
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
   const [todos, setTodos] = useState(() => {
+    //defult value for todos its the value in local storage
     const savedTodos = localStorage.getItem("todos");
     return savedTodos ? JSON.parse(savedTodos) : [];
   });
