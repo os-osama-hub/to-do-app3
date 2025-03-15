@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import "./App.css";
 import { Button, TextField } from "@mui/material";
 
 function App() {
-  const [disabled, setDisabled] = useState(false);
-  const [name, setName] = useState("");
-  const [title, setTitle] = useState("");
-  const [todos, setTodos] = useState([]);
-  const [theme, setTheme] = useState("light");
-
-  // Define theme color variables
   const lightTheme = {
     background: "bg-gradient-to-r from-blue-50 to-indigo-100",
     text: "text-indigo-900",
@@ -29,13 +22,26 @@ function App() {
     inputBg: "bg-gray-700 text-white",
     todoItem: "bg-gray-800 hover:bg-gray-700 border-indigo-800",
   };
+  const [disabled, setDisabled] = useState(false);
+  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [todos, setTodos] = useState(() => {
+    const savedTodos = localStorage.getItem("todos");
+    return savedTodos ? JSON.parse(savedTodos) : [];
+  });
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme");
+  });
+  const [err, setErr] = useState("");
+
+  // Define theme color variables
 
   // Get current theme colors
   const colors = theme === "light" ? lightTheme : darkTheme;
 
   const handleAdd = () => {
     if (!name.trim() || !title.trim()) {
-      alert("Please enter both name and title");
+      setErr("Please enter both name and title");
       return;
     }
     setTodos((prev) => [
@@ -44,6 +50,7 @@ function App() {
     ]);
     setName("");
     setTitle("");
+    setErr("");
   };
 
   const handleToggleComplete = (index) => {
@@ -60,6 +67,14 @@ function App() {
   const handleDelAll = () => {
     setTodos([]);
   };
+
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   return (
     <div className={`min-h-screen ${colors.background} ${colors.text} p-4`}>
@@ -81,11 +96,17 @@ function App() {
               Todo App
             </span>
           </h1>
+          {err && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              <span className="block sm:inline">{err}</span>
+            </div>
+          )}
 
           <div className="space-y-4 mb-8">
             <div>
               <label className="block mb-2 font-medium">Task Name</label>
               <TextField
+                required
                 fullWidth
                 variant="outlined"
                 placeholder="Enter task name"
@@ -101,6 +122,7 @@ function App() {
             <div>
               <label className="block mb-2 font-medium">Task Description</label>
               <TextField
+                required
                 fullWidth
                 variant="outlined"
                 placeholder="Enter task description"
@@ -108,6 +130,9 @@ function App() {
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAdd()} //تكافئ الملاحظه ولكنها بطريقة افضل وهو المطلوب
                 // onKeyDown={(e) => {if (e.key === "Enter") { handleAdd(); }
+                InputProps={{
+                  className: colors.inputBg,
+                }}
               />
             </div>
 
